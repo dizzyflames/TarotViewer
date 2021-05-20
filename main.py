@@ -1,5 +1,3 @@
-# img_viewer.py
-
 import PySimpleGUI as sg
 import os.path
 import PIL.Image
@@ -8,11 +6,13 @@ import random
 import io
 
 
+# used to sort the files by the prepending number
 def sortByNum(e):
     return int(e.split(".")[0])
 
 
-def convert_to_bytes(file_or_byte, resize=None):
+# converts the file to bytes
+def convert_to_bytes(file_or_byte, resize=None, transpose=False):
     if isinstance(file_or_byte, str):
         img = PIL.Image.open(file_or_byte)
     else:
@@ -23,6 +23,8 @@ def convert_to_bytes(file_or_byte, resize=None):
             img = PIL.Image.open(dataBytesIO)
 
     cur_width, cur_height = img.size
+    if transpose:
+        img = PIL.Image.Image.transpose(img, PIL.Image.FLIP_TOP_BOTTOM)
     if resize:
         new_width, new_height = resize
         scale = min(new_height / cur_height, new_width / cur_width)
@@ -33,23 +35,19 @@ def convert_to_bytes(file_or_byte, resize=None):
         return bio.getvalue()
 
 
-def getMeaning(fname, filename):
-    filename = os.path.join(
-        folder, fname
-    )
-    textFileName = filename.split(".jpg")
+# accepts the file name and reads the file
+# returns the contents of the file
+def getMeaning(file, directory):
+    textFileName = directory.split(".jpg")
     textFileName[0] += ".txt"
     desc = open("Meaning/" + textFileName[0][6:], "r")
     lines = desc.readlines()
-    meaning = fname + "\n\nUpright: \n" + lines[0] + "\nReversed: \n" + lines[1]
+    meaning = file + "\n\nUpright: \n" + lines[0] + "\nReversed: \n" + lines[1]
     if lines[1].endswith("\n"):
         meaning += "\nAdditional meanings: \n" + str(lines[2])
         if lines[2].endswith("\n"):
             meaning += "\nReversed: \n" + str(lines[3])
     return meaning
-
-
-# First the window layout in 2 columns
 
 
 file_list_column = [
@@ -66,22 +64,17 @@ file_list_column = [
     [sg.Text("Resize to"), sg.In(key='-W-', size=(5, 1)), sg.In(key='-H-', size=(5, 1))]
 ]
 
-# For now will only show the name of the file that was chosen
-
 image_viewer_column = [
     [sg.Text("Choose an image from list on left:")],
-    # [sg.Text(size=(40, 1), key="-TOUT-")],
     [sg.Image(key="-IMAGE-")],
 ]
 
 image_description_column = [
     [sg.Text("description here")],
-    # [sg.Text(size=(20, None), key="-CNAME-")],
     [sg.Text(size=(40, None), key="-TOUT-")],
 ]
 
 # ----- Full layout -----
-
 layout = [
     [
         sg.Column(file_list_column),
@@ -96,12 +89,12 @@ layout = [
 
 window = sg.Window("Tarot", layout, finalize=True)
 
-# Get the list of images in the cards folder
 folder = "cards"
 try:
     file_list = os.listdir(folder)
 except:
     file_list = []
+
 fnames = [f
           for f in file_list
           if os.path.isfile(os.path.join(folder, f))
@@ -117,23 +110,21 @@ while True:
     if event == "Exit" or event == sg.WIN_CLOSED:
         break
 
-    if event == "-FILE LIST-":  # A file was chosen from the listbox
+    trans = 0
+    fname = ""
 
+    if event == "-FILE LIST-":
         fname = values["-FILE LIST-"][0]
         filename = os.path.join(
             folder, fname
         )
-
-        if values['-W-'] and values['-H-']:
-            new_size = int(values['-W-']), int(values['-H-'])
-        else:
-            new_size = None
-        if new_size is None:
-            new_size = (300, 300)
-
     elif event == "-DRAW-":
         rand = random.randint(0, 77)
         fname = fnames[rand]
+
+        trans = random.randint(0, 1)
+
+    if fname != "":
         filename = os.path.join(
             folder, fname
         )
@@ -145,18 +136,10 @@ while True:
         if new_size is None:
             new_size = (300, 300)
 
-        rand = random.randint(0, 1)
-        if rand == 0:
-            img = PIL.Image.open(filename)
-            img = PIL.Image.Image.transpose(img, PIL.Image.FLIP_TOP_BOTTOM)
-            bio = io.BytesIO()
-            img.save(bio, format="PNG")
-            filename = bio.getvalue()
+        meaning = getMeaning(fname, filename)
+        window["-TOUT-"].update(meaning)
 
-    meaning = getMeaning(fname, filename)
-    window["-TOUT-"].update(meaning)
-
-    window["-IMAGE-"].update(data=convert_to_bytes(filename, resize=new_size))
+        window["-IMAGE-"].update(data=convert_to_bytes(filename, resize=new_size, transpose=trans.__bool__()))
 
 window.close()
 # Press the green button in the gutter to run the script.
