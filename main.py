@@ -114,9 +114,12 @@ while True:
             textFileName[0] += ".txt"
             desc = open("Meaning/"+textFileName[0][6:], "r")
             lines = desc.readlines()
-            ## new_text = textwrap.wrap(lines, 40)
-            ## lines = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            window["-TOUT-"].update("Upright: \n" + lines[0] + "\nReversed: \n" + lines[2])
+            meaning = "Upright: \n" + lines[0] + "\nReversed: \n" + lines[1]
+            if lines[1].endswith("\n"):
+                meaning += "\nAdditional meanings: \n" + str(lines[2])
+                if lines[2].endswith("\n"):
+                    meaning += "\nReversed: \n" + str(lines[3])
+            window["-TOUT-"].update(meaning)
             # window["-IMAGE-"].update(filename=filename)
             if values['-W-'] and values['-H-']:
                 new_size = int(values['-W-']), int(values['-H-'])
