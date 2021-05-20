@@ -3,11 +3,9 @@
 import PySimpleGUI as sg
 import os.path
 import PIL.Image
-import io
 import base64
-import textwrap
 import random
-import re
+import io
 
 
 def sortByNum(e):
@@ -33,6 +31,22 @@ def convert_to_bytes(file_or_byte, resize=None):
         img.save(bio, format="PNG")
         del img
         return bio.getvalue()
+
+
+def getMeaning(fname, filename):
+    filename = os.path.join(
+        folder, fname
+    )
+    textFileName = filename.split(".jpg")
+    textFileName[0] += ".txt"
+    desc = open("Meaning/" + textFileName[0][6:], "r")
+    lines = desc.readlines()
+    meaning = fname + "\n\nUpright: \n" + lines[0] + "\nReversed: \n" + lines[1]
+    if lines[1].endswith("\n"):
+        meaning += "\nAdditional meanings: \n" + str(lines[2])
+        if lines[2].endswith("\n"):
+            meaning += "\nReversed: \n" + str(lines[3])
+    return meaning
 
 
 # First the window layout in 2 columns
@@ -62,6 +76,7 @@ image_viewer_column = [
 
 image_description_column = [
     [sg.Text("description here")],
+    # [sg.Text(size=(20, None), key="-CNAME-")],
     [sg.Text(size=(40, None), key="-TOUT-")],
 ]
 
@@ -80,7 +95,6 @@ layout = [
 ]
 
 window = sg.Window("Tarot", layout, finalize=True)
-
 
 # Get the list of images in the cards folder
 folder = "cards"
@@ -104,42 +118,45 @@ while True:
         break
 
     if event == "-FILE LIST-":  # A file was chosen from the listbox
-        try:
-            filename = os.path.join(
-                folder, values["-FILE LIST-"][0]
-            )
-            ## read the meaning .txt file
-            textFileName = filename.split(".jpg")
-            textFileName[0] += ".txt"
-            desc = open("Meaning/"+textFileName[0][6:], "r")
-            lines = desc.readlines()
-            meaning = "Upright: \n" + lines[0] + "\nReversed: \n" + lines[1]
-            if lines[1].endswith("\n"):
-                meaning += "\nAdditional meanings: \n" + str(lines[2])
-                if lines[2].endswith("\n"):
-                    meaning += "\nReversed: \n" + str(lines[3])
-            window["-TOUT-"].update(meaning)
-            if values['-W-'] and values['-H-']:
-                new_size = int(values['-W-']), int(values['-H-'])
-            else:
-                new_size = None
-            if new_size is None:
-                new_size = (300, 300)
-            window["-IMAGE-"].update(data=convert_to_bytes(filename, resize=new_size))
-        except:
-            pass
-    elif event == "-DRAW-":
-        rand = random.randint(0, 78)
+
+        fname = values["-FILE LIST-"][0]
         filename = os.path.join(
-            folder, fnames[rand]
+            folder, fname
         )
+
         if values['-W-'] and values['-H-']:
             new_size = int(values['-W-']), int(values['-H-'])
         else:
             new_size = None
         if new_size is None:
             new_size = (300, 300)
-        window["-IMAGE-"].update(data=convert_to_bytes(filename, resize=new_size))
+
+    elif event == "-DRAW-":
+        rand = random.randint(0, 77)
+        fname = fnames[rand]
+        filename = os.path.join(
+            folder, fname
+        )
+
+        if values['-W-'] and values['-H-']:
+            new_size = int(values['-W-']), int(values['-H-'])
+        else:
+            new_size = None
+        if new_size is None:
+            new_size = (300, 300)
+
+        rand = random.randint(0, 1)
+        if rand == 0:
+            img = PIL.Image.open(filename)
+            img = PIL.Image.Image.transpose(img, PIL.Image.FLIP_TOP_BOTTOM)
+            bio = io.BytesIO()
+            img.save(bio, format="PNG")
+            filename = bio.getvalue()
+
+    meaning = getMeaning(fname, filename)
+    window["-TOUT-"].update(meaning)
+
+    window["-IMAGE-"].update(data=convert_to_bytes(filename, resize=new_size))
 
 window.close()
 # Press the green button in the gutter to run the script.
