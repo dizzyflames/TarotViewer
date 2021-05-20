@@ -108,7 +108,6 @@ while True:
             filename = os.path.join(
                 folder, values["-FILE LIST-"][0]
             )
-
             ## read the meaning .txt file
             textFileName = filename.split(".jpg")
             textFileName[0] += ".txt"
@@ -120,7 +119,6 @@ while True:
                 if lines[2].endswith("\n"):
                     meaning += "\nReversed: \n" + str(lines[3])
             window["-TOUT-"].update(meaning)
-            # window["-IMAGE-"].update(filename=filename)
             if values['-W-'] and values['-H-']:
                 new_size = int(values['-W-']), int(values['-H-'])
             else:
@@ -130,14 +128,18 @@ while True:
             window["-IMAGE-"].update(data=convert_to_bytes(filename, resize=new_size))
         except:
             pass
-    '''elif event == "-DRAW-":
+    elif event == "-DRAW-":
         rand = random.randint(0, 78)
-        filename = re.compile(str(rand) + ".*")
         filename = os.path.join(
-            folder, filename[0]
+            folder, fnames[rand]
         )
-        new_size = (300,300)
-        window["-IMAGE-"].update(data=convert_to_bytes(filename, resize=new_size))'''
+        if values['-W-'] and values['-H-']:
+            new_size = int(values['-W-']), int(values['-H-'])
+        else:
+            new_size = None
+        if new_size is None:
+            new_size = (300, 300)
+        window["-IMAGE-"].update(data=convert_to_bytes(filename, resize=new_size))
 
 window.close()
 # Press the green button in the gutter to run the script.
