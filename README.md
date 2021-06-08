@@ -2,6 +2,6 @@
 A simple program to get your tarot reading
 
 
-![](https://github.com/dizzyflames/TarotViewer/blob/main/screenshots/cOYGrqvwQb.png)
+![Drawing a reversed card](https://github.com/dizzyflames/TarotViewer/blob/main/screenshots/cOYGrqvwQb.png)
 
-![](https://github.com/dizzyflames/TarotViewer/blob/main/screenshots/iYmmfd7LvH.png)
+![Clicking specific card from list](https://github.com/dizzyflames/TarotViewer/blob/main/screenshots/iYmmfd7LvH.png)
