@@ -1,4 +1,7 @@
 # TarotViewer
 A simple program to get your tarot reading
 
-(might post pictures later)
+
+![](https://github.com/dizzyflames/TarotViewer/blob/main/screenshots/cOYGrqvwQb.png)
+
+![](https://github.com/dizzyflames/TarotViewer/blob/main/screenshots/iYmmfd7LvH.png)
